@@ -28,6 +28,12 @@ public class CongruencialLineal {
         this.m = 2;
         this.seed = 0;
     }
+
+    public CongruencialLineal(double c) {
+        this.c = c;
+    }
+    
+    
     
     public CongruencialLineal(double a, double m, double c, double seed, boolean ideal, boolean incluirUno, double precision) {
         if (ideal) {
