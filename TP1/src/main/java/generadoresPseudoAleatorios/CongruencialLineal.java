@@ -19,6 +19,7 @@ public class CongruencialLineal {
     private double r;   //nro Pseudo Aleatorio
     private boolean first;  //Utilizado para determinar si ya se genero primer numero.
     private int incluirUno; //Se incluye 1 como valor posible?
+    private double precision; //Define la precision con la que trabajar
     
 
     public CongruencialLineal() {
@@ -28,7 +29,7 @@ public class CongruencialLineal {
         this.seed = 0;
     }
     
-    public CongruencialLineal(int a, int m, int c, int seed, boolean ideal, boolean incluirUno) {
+    public CongruencialLineal(double a, double m, double c, double seed, boolean ideal, boolean incluirUno, double precision) {
         if (ideal) {
             this.a = 1 + 4 * a;     //a = k
             this.m = Math.pow(2, m);         //m = g
@@ -43,15 +44,17 @@ public class CongruencialLineal {
         }
         this.c = c;
         this.seed = seed;
+        this.first = false;
     } 
     
     public double RND (){
-        if (first) {
+        if (!first) {
             xi = (a*seed + c)%(m);
-            return r = (xi)/m+incluirUno;
+            first = true;
+            return r = (xi)/(m-incluirUno);
         } else {
             xi = (a*xi + c)%(m);
-            return r = (xi)/m+incluirUno;
+            return r = (xi)/(m-incluirUno);
         }
     }
 }
