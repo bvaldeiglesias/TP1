@@ -10,24 +10,20 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import generadoresPseudoAleatorios.*;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 
 public class FXMLController implements Initializable {
-
+    ///Ejercicio A
     @FXML
     private RadioButton radCongruencialMixto;
     @FXML
@@ -67,147 +63,184 @@ public class FXMLController implements Initializable {
     @FXML
     private TableView tblTabla = new TableView();
     
-    private CongruencialLineal rndGenerator;
+    private Congruencial rndGenerator;
+    
+    ///Ejercicio B
+    
+    ///Ejercicio C
     
 
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+//////////////////////////////////////////////////////Ejercicio A/////////////////////////////////////////////
         //Cargar valores en Combobox
         ObservableList<String> options
                 = FXCollections.observableArrayList(
-                        "0.1",
-                        "0.01",
-                        "0.001",
-                        "0.0001"
+                        "1",
+                        "2",
+                        "3",
+                        "4"
                 );
         cmbPrecision.getItems().addAll(options);
 
-        //Chekear que si hay que habilitar o deshabilitar la edicion de parametros
+        //Chekear si hay que habilitar o deshabilitar la edicion de parametros
         if (chkMod.isSelected()) {
             paneParametros.setDisable(false);
         } else {
             paneParametros.setDisable(true);
         }
         
-        
+        //Crear y definir columnas de tabla
         tblTabla.setEditable(true);
         
         TableColumn colIndice = new TableColumn("Indice");
         TableColumn colRND = new TableColumn("RND");
         
         tblTabla.getColumns().addAll(colIndice, colRND);
-        
-        
-        
-//        final ObservableList<Row> data = FXCollections.observableArrayList(
-//                new Row( "1", "mmmmmmm"),
-//                new Row("2", "aaaaaaaaa")
-//        );
-        
+     
         colIndice.setCellValueFactory(new PropertyValueFactory("indice"));
         colRND.setCellValueFactory(new PropertyValueFactory("rnd"));
         
- //       tblTabla.setItems(data);
+        //Tooltips de ayuda
+        final Tooltip tooltip = new Tooltip();
+        tooltip.setText(
+                "\nIdeal:\n"
+                + "Modulo M =  2^g\n"  
+                + "Constante A =  1 + 4 * k\n"        );
         
-    }
+        chkIdeal.setTooltip(tooltip);
+        
+        final Tooltip tooltipIncluir1 = new Tooltip();
+        tooltipIncluir1.setText(
+                "\nIncluir al valor 1 como \n"
+                + "parte del conjunto de numeros aceptados\n" );
+        
+        chkIncluir1.setTooltip(tooltipIncluir1); 
+        
+//////////////////////////////////////////////////////Ejercicio B/////////////////////////////////////////////
 
+
+
+//////////////////////////////////////////////////////Ejercicio C/////////////////////////////////////////////
+
+
+    }
+    
+    
+    
+    
+    
+//////////////////////////////////////////////////////Ejercicio A/////////////////////////////////////////////
     @FXML
-    //Generar numeros RND iniciales con los parametros ingresados, chekeando nulls
+    //Generar numeros RND iniciales con los parametros ingresados, validando datos de entrada
     private void handleButtonActionGenerar(ActionEvent event) {
+        
+        //Modificar habilitacion en  base de que se permite cambiar o no una vez precionado el boton generar
+        btnSiguiente.setDisable(false);
+        btnGenerar.setDisable(true);
+        radCongruencialMixto.setDisable(true);
+        radCongruencialMultiplicativo.setDisable(true);
+        txtCantNros.setDisable(true);
+        chkMod.setDisable(true);
+        txtSemilla.setDisable(true);
+        txtCteC.setDisable(true);
+        chkIncluir1.setDisable(true);
+        chkIdeal.setDisable(true);
+        txtAoG.setDisable(true);
+        txtMoK.setDisable(true);
+        cmbPrecision.setDisable(true);
         
         int cantNros = Integer.parseInt(txtCantNros.getText());
         
+        //Se ingresaron parametros manualmente o se utilizan los predefinidos?
         if (!chkMod.isSelected()) {
             if (radCongruencialMixto.isSelected()) {
-                
-                rndGenerator = new CongruencialLineal();
-                final ObservableList<Row> data = FXCollections.observableArrayList();             
-                for (int i = 1; i < cantNros+1; i++) {
-                    
-                    String auxIndice = String.valueOf(i);
-                    String auxRND = String.valueOf(rndGenerator.RND());
-                    data.add(new Row( auxIndice, auxRND));
-                    
-                }
-                tblTabla.setItems(data);
-                
-                
+
+                rndGenerator = new Congruencial();
 
             } else {
-                
-                rndGenerator = new CongruencialLineal(0);
-                final ObservableList<Row> data = FXCollections.observableArrayList();             
-                for (int i = 1; i < cantNros+1; i++) {
-                    
-                    String auxIndice = String.valueOf(i);
-                    String auxRND = String.valueOf(rndGenerator.RND());
-                    data.add(new Row( auxIndice, auxRND));
-                    
-                }
-                tblTabla.setItems(data);
+
+                rndGenerator = new Congruencial(0);
+
             }
         } else {
-            if (true) {
-
+            if (true) { //Validar que los txtBox no sean nulos o tengan valores erroneos, probar con try catch
                 double seed = Double.parseDouble(txtSemilla.getText());
-                double cteC = Double.parseDouble(txtCteC.getText());
                 double aOg = Double.parseDouble(txtAoG.getText());
                 double mOk = Double.parseDouble(txtMoK.getText());
                 String test = cmbPrecision.getSelectionModel().getSelectedItem().toString();
-                double precision = Double.parseDouble(test);
+                int precision = Integer.parseInt(test);
                 boolean incluir1 = chkIncluir1.isSelected();
                 boolean ideal = chkIdeal.isSelected();
+                double cteC;
                 if (radCongruencialMixto.isSelected()) {
-                    
-                    rndGenerator = new CongruencialLineal(aOg, mOk, cteC, seed, ideal, incluir1, precision);
-                    final ObservableList<Row> data = FXCollections.observableArrayList();
-                    for (int i = 1; i < cantNros + 1; i++) {
-
-                        String auxIndice = String.valueOf(i);
-                        String auxRND = String.valueOf(rndGenerator.RND());
-                        data.add(new Row(auxIndice, auxRND));
-
-                    }
-                    tblTabla.setItems(data);
-
+                    cteC = Double.parseDouble(txtCteC.getText());
                 } else {
-                    
-                    rndGenerator = new CongruencialLineal(aOg, mOk, 0, seed, ideal, incluir1, precision);
-                    final ObservableList<Row> data = FXCollections.observableArrayList();
-                    for (int i = 1; i < cantNros + 1; i++) {
-
-                        String auxIndice = String.valueOf(i);
-                        String auxRND = String.valueOf(rndGenerator.RND());
-                        data.add(new Row(auxIndice, auxRND));
-
-                    }
-                    tblTabla.setItems(data);
+                    cteC = 0;
                 }
+                
+                //Instanciar clase generadora de nros pseudoaleatorios
+                rndGenerator = new Congruencial(aOg, mOk, cteC, seed, ideal, incluir1, precision);
 
             }
+            
+            //Generar "cantNros" de RND y cargar en tabla
+            final ObservableList<Row> data = FXCollections.observableArrayList();
+            for (int i = 1; i < cantNros + 1; i++) {
+
+                String auxIndice = String.valueOf(i);
+                String auxRND = String.valueOf(rndGenerator.truncateRND());
+                data.add(new Row(auxIndice, auxRND));
+
+            }
+            tblTabla.setItems(data);
         }
 
     }
 
     @FXML
+    //Generar siguente valor de serie
     private void Siguiente(ActionEvent event) {
         final ObservableList<Row> data = FXCollections.observableArrayList();
         
         int auxin = tblTabla.getItems().size() +1;
         String auxIndice;
         auxIndice = String.valueOf(auxin);
-        String auxRND = String.valueOf(rndGenerator.RND());
+        String auxRND = String.valueOf(rndGenerator.truncateRND());
         data.add(new Row(auxIndice, auxRND));
         tblTabla.getItems().addAll(data);
         
     }
 
     @FXML
+    //Restaurar Valores del programa
     private void Reiniciar(ActionEvent event) {
+        btnSiguiente.setDisable(true);
+        btnGenerar.setDisable(false);
+        radCongruencialMixto.setDisable(false);
+        radCongruencialMultiplicativo.setDisable(false);
+        txtCantNros.setDisable(false);
+        txtCantNros.setText("");
+        chkMod.setDisable(false);
+        txtSemilla.setDisable(false);
+        if (!radCongruencialMultiplicativo.isSelected()) {
+            txtCteC.setDisable(false);
+        }
+        chkIncluir1.setDisable(false);
+        chkIdeal.setDisable(false);
+        txtAoG.setDisable(false);
+        txtMoK.setDisable(false);
+        cmbPrecision.setDisable(false);
+        
+        rndGenerator = null;
+        
+        tblTabla.getItems().clear();
     }
 
     @FXML
+    //CheckBox de Ideal, modifica Labels dependiendo seleccion
     private void handleChkIdeal(ActionEvent event) {
         //Chekear 
         if (chkIdeal.isSelected()) {
@@ -220,6 +253,7 @@ public class FXMLController implements Initializable {
     }
 
     @FXML
+    //CheckBox de Modificacion, permite modificar o no parametros de entrada
     private void handleChkMod(ActionEvent event) {
         if (chkMod.isSelected()) {
             paneParametros.setDisable(false);
@@ -230,6 +264,7 @@ public class FXMLController implements Initializable {
     }
 
     @FXML
+    //RadialBox de Metodo, Habilita o deshabilita ingreso de "C" dependiendo si es Cong Mixto o Lineal
     private void handleRadChangeMetodo(ActionEvent event) {
         if (radCongruencialMultiplicativo.isSelected()) {
             txtCteC.setDisable(true);
@@ -239,7 +274,8 @@ public class FXMLController implements Initializable {
         }
     }
     
-    public static class Row{
+    //Clase privada interna para la creacion de filas de la tabla, con valor de indice y nro RND generado
+    private static class Row{
          private final SimpleStringProperty indice;
          private final SimpleStringProperty rnd;
 
@@ -265,6 +301,11 @@ public class FXMLController implements Initializable {
             rnd.set(fName);
         }
     }
+    
+//////////////////////////////////////////////////////Ejercicio B/////////////////////////////////////////////
+    
+    
+//////////////////////////////////////////////////////Ejercicio C/////////////////////////////////////////////
 }
 
 
