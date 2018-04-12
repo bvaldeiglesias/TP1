@@ -185,19 +185,17 @@ public class FXMLController implements Initializable {
                 rndGenerator = new Congruencial(aOg, mOk, cteC, seed, ideal, incluir1, precision);
 
             }
-            
-            //Generar "cantNros" de RND y cargar en tabla
-            final ObservableList<Row> data = FXCollections.observableArrayList();
-            for (int i = 1; i < cantNros + 1; i++) {
-
-                String auxIndice = String.valueOf(i);
-                String auxRND = String.valueOf(rndGenerator.truncateRND());
-                data.add(new Row(auxIndice, auxRND));
-
-            }
-            tblTabla.setItems(data);
         }
+        //Generar "cantNros" de RND y cargar en tabla
+        final ObservableList<Row> data = FXCollections.observableArrayList();
+        for (int i = 1; i < cantNros + 1; i++) {
 
+            String auxIndice = String.valueOf(i);
+            String auxRND = String.valueOf(rndGenerator.truncateRND());
+            data.add(new Row(auxIndice, auxRND));
+
+        }
+        tblTabla.setItems(data);
     }
 
     @FXML
@@ -275,7 +273,7 @@ public class FXMLController implements Initializable {
     }
     
     //Clase privada interna para la creacion de filas de la tabla, con valor de indice y nro RND generado
-    private static class Row{
+    public static class Row{
          private final SimpleStringProperty indice;
          private final SimpleStringProperty rnd;
 
