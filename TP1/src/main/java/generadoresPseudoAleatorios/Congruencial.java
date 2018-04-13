@@ -27,7 +27,7 @@ public class Congruencial {
 
     public Congruencial() {
         this.a = 71561;
-        this.c = 56822117;
+        this.c = 56822;
         this.m = 341157;
         this.seed = 31767;
         this.precision=4;

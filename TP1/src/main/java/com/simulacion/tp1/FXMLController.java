@@ -16,11 +16,19 @@ import generadoresPseudoAleatorios.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
+import pruebasAleatoridad.ChiCuadrado;
 
 public class FXMLController implements Initializable {
     ///Ejercicio A
@@ -68,8 +76,32 @@ public class FXMLController implements Initializable {
     ///Ejercicio B
     
     ///Ejercicio C
+    @FXML
+    private Button btnProbar;
+    @FXML
+    private TextField txtCantNrosC;
+    @FXML
+    private Button btnReiniciarC;
+    @FXML
+    private BarChart chrtFrecuenciaC;
+    @FXML
+    private CategoryAxis xIntervalo;
+    @FXML
+    private TextField txtCantIntervalosC;
+    @FXML
+    private ListView lsvSerie;
+    @FXML
+    private LineChart lnchrEsperadaC;
+    @FXML
+    private NumberAxis yFrecBc;
+    @FXML
+    private NumberAxis yFrecLn;
+    @FXML
+    private TextArea txtAResultados;
+        
+    private double[] serie;
+    private ChiCuadrado pruebaChi;
     
-
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -106,7 +138,7 @@ public class FXMLController implements Initializable {
         //Tooltips de ayuda
         final Tooltip tooltip = new Tooltip();
         tooltip.setText(
-                "\nIdeal:\n"
+                "Ideal:\n"
                 + "Modulo M =  2^g\n"  
                 + "Constante A =  1 + 4 * k\n"        );
         
@@ -114,7 +146,7 @@ public class FXMLController implements Initializable {
         
         final Tooltip tooltipIncluir1 = new Tooltip();
         tooltipIncluir1.setText(
-                "\nIncluir al valor 1 como \n"
+                "Incluir al valor 1 como \n"
                 + "parte del conjunto de numeros aceptados\n" );
         
         chkIncluir1.setTooltip(tooltipIncluir1); 
@@ -125,7 +157,7 @@ public class FXMLController implements Initializable {
 
 //////////////////////////////////////////////////////Ejercicio C/////////////////////////////////////////////
 
-
+        //No se necesita inicializar nada.
     }
     
     
@@ -213,8 +245,11 @@ public class FXMLController implements Initializable {
     }
 
     @FXML
-    //Restaurar Valores del programa
+    //Restaurar Valores del programa en Tab A
     private void Reiniciar(ActionEvent event) {
+        
+        
+        
         btnSiguiente.setDisable(true);
         btnGenerar.setDisable(false);
         radCongruencialMixto.setDisable(false);
@@ -271,8 +306,10 @@ public class FXMLController implements Initializable {
             txtCteC.setDisable(false);
         }
     }
+
+
     
-    //Clase privada interna para la creacion de filas de la tabla, con valor de indice y nro RND generado
+    //Clase PUBLICA interna para la creacion de filas de la tabla, con valor de indice y nro RND generado
     public static class Row{
          private final SimpleStringProperty indice;
          private final SimpleStringProperty rnd;
@@ -304,8 +341,101 @@ public class FXMLController implements Initializable {
     
     
 //////////////////////////////////////////////////////Ejercicio C/////////////////////////////////////////////
-}
+    @FXML
+    //Efectuar prueba de frecuencia en serie generada por congruencial mixto
+    private void handleButtonProbar(ActionEvent event) {
 
+        btnProbar.setDisable(true);
+        btnReiniciarC.setDisable(false);
+        txtCantIntervalosC.setDisable(true);
+        txtCantNrosC.setDisable(true);
+        Reiniciar(event);
+
+        //Genera serie aleatoria con generadorRND congruencial mixto para probar
+        rndGenerator = new Congruencial();
+        serie = new double[Integer.parseInt(txtCantNrosC.getText())];
+
+        for (int i = 0; i < serie.length; i++) {
+            serie[i] = Double.parseDouble(rndGenerator.truncateRND());
+            lsvSerie.getItems().add(serie[i]);
+        }
+
+        //Calculo de chicuadrado y verificacion de hipotesis
+        pruebaChi = new ChiCuadrado(serie, Integer.parseInt(txtCantIntervalosC.getText()), rndGenerator.getPrecision());
+        if (pruebaChi.hipotesis()) {
+            txtAResultados.setText("Se aprueba hipotesis \nFrecuencia esperada: " + pruebaChi.getFrecuenciaEsp(1));
+            txtAResultados.setVisible(true);
+        } else {
+            txtAResultados.setText("Se rechaza hipotesis \nFrecuencia esperada: " + pruebaChi.getFrecuenciaEsp(1));
+            txtAResultados.setVisible(true);
+        }
+
+        //Parametros para definir escala de eje Y
+        double unit = pruebaChi.getFrecuenciaEsp(1) / (double) 10;
+        if (unit < 1) {
+            unit = 1;
+        }
+        double upperLimit = pruebaChi.getFrecuenciaEsp(1) + unit + 5;
+
+        // base bar chart
+        chrtFrecuenciaC.setLegendVisible(false);
+        chrtFrecuenciaC.setAnimated(false);
+        chrtFrecuenciaC.setCategoryGap(10);
+
+        // overlay line chart
+        lnchrEsperadaC.setLegendVisible(false);
+        lnchrEsperadaC.setAnimated(false);
+        lnchrEsperadaC.setCreateSymbols(true);
+        lnchrEsperadaC.setAlternativeRowFillVisible(false);
+        lnchrEsperadaC.setAlternativeColumnFillVisible(false);
+        lnchrEsperadaC.setHorizontalGridLinesVisible(false);
+        lnchrEsperadaC.setVerticalGridLinesVisible(false);
+        lnchrEsperadaC.getXAxis().setVisible(false);
+        lnchrEsperadaC.getYAxis().setVisible(false);
+        //Carga stylesheet a linechart
+        lnchrEsperadaC.getStylesheets().addAll(getClass().getResource("/styles/chart.css").toExternalForm());
+
+        //Sincronizar rango de eje Y de ambas graficas 
+        yFrecBc.setAutoRanging(false);
+        yFrecBc.setLowerBound(0);
+        yFrecBc.setUpperBound(upperLimit);
+        yFrecBc.setTickUnit(unit);
+
+        yFrecLn.setAutoRanging(false);
+        yFrecLn.setLowerBound(0);
+        yFrecLn.setUpperBound(upperLimit);
+        yFrecLn.setTickUnit(unit);
+
+        //Cargar datos de distribucion de frecuencia en graficos
+        XYChart.Series set3 = new XYChart.Series<>();
+        for (int i = 0; i < pruebaChi.getK(); i++) {
+            double aux = (double) i;
+            set3.getData().add(new XYChart.Data(pruebaChi.getIntervalo(aux), pruebaChi.getFrecuenciaObs(i)));
+        }
+        chrtFrecuenciaC.getData().addAll(set3);
+
+        XYChart.Series set2 = new XYChart.Series<>();
+        for (int i = 0; i < pruebaChi.getK(); i++) {
+            double aux = (double) i;
+            set2.getData().add(new XYChart.Data(pruebaChi.getIntervalo(aux), pruebaChi.getFrecuenciaEsp(i)));
+        }
+        lnchrEsperadaC.getData().addAll(set2);
+
+    }
+
+    @FXML
+    //Restaurar Valores del programa en Tab C
+    private void handleButtonReiniciarC(ActionEvent event) {
+        btnProbar.setDisable(false);
+        btnReiniciarC.setDisable(true);
+        txtCantIntervalosC.setDisable(false);
+        txtCantNrosC.setDisable(false);
+        txtAResultados.setVisible(false);
+
+        chrtFrecuenciaC.getData().clear();
+        lnchrEsperadaC.getData().clear();
+    }
+}
 
     
 
