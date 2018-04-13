@@ -28,7 +28,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.simulacion.tp1.FXMLController">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.simulacion.tp1.FXMLController">
    <center>
       <TabPane prefHeight="506.0" prefWidth="622.0" style="-fx-background-color: light gray;" tabClosingPolicy="UNAVAILABLE">
         <tabs>
@@ -52,18 +52,18 @@
                               </Pane>
                               <Pane fx:id="paneParametros" layoutX="283.0" layoutY="103.0" prefHeight="226.0" prefWidth="274.0">
                                  <children>
-                                    <Label layoutX="9.0" layoutY="4.0" text="Semilla" />
+                                    <Label layoutY="4.0" text="Semilla" />
                                     <TextField fx:id="txtSemilla" layoutX="113.0" prefHeight="25.0" prefWidth="129.0" />
                                     <Label fx:id="lblA" layoutY="158.0" text="Valor A" />
                                     <TextField fx:id="txtAoG" layoutX="110.0" layoutY="154.0" prefHeight="25.0" prefWidth="129.0" />
-                                    <Label layoutX="2.0" layoutY="186.0" text="Precisión:" />
-                                    <ComboBox fx:id="cmbPrecision" layoutX="109.0" layoutY="182.0" prefHeight="25.0" prefWidth="129.0" visibleRowCount="4" />
-                                    <Label layoutX="6.0" layoutY="35.0" text="Constante C" />
+                                    <Label layoutY="187.0" text="Precisión:" />
+                                    <ComboBox fx:id="cmbPrecision" layoutX="109.0" layoutY="184.0" prefHeight="25.0" prefWidth="129.0" visibleRowCount="4" />
+                                    <Label layoutY="35.0" text="Constante C" />
                                     <TextField fx:id="txtCteC" layoutX="113.0" layoutY="31.0" prefHeight="25.0" prefWidth="129.0" />
-                                    <CheckBox fx:id="chkIdeal" layoutX="19.0" layoutY="96.0" mnemonicParsing="false" onAction="#handleChkIdeal" text="¿Utilizar G y K para calculo ideal?" />
+                                    <CheckBox fx:id="chkIdeal" layoutX="17.0" layoutY="96.0" mnemonicParsing="false" onAction="#handleChkIdeal" text="¿Utilizar G y K para calculo ideal?" />
                                     <CheckBox fx:id="chkIncluir1" layoutX="18.0" layoutY="70.0" mnemonicParsing="false" text="¿Incluir 1?" />
                                     <Label fx:id="lblM" layoutY="127.0" text="Modulo M" />
-                                    <TextField fx:id="txtMoK" layoutX="110.0" layoutY="123.0" prefHeight="25.0" prefWidth="129.0" />
+                                    <TextField fx:id="txtMoK" layoutX="110.0" layoutY="124.0" prefHeight="25.0" prefWidth="129.0" />
                                  </children>
                               </Pane>
                               <Button fx:id="btnGenerar" layoutX="14.0" layoutY="165.0" mnemonicParsing="false" onAction="#handleButtonActionGenerar" text="Generar" />
@@ -73,7 +73,7 @@
                               <TextField fx:id="txtCantNros" layoutX="145.0" layoutY="126.0" prefHeight="26.0" prefWidth="98.0" />
                               <CheckBox fx:id="chkMod" layoutX="283.0" layoutY="45.0" mnemonicParsing="false" onAction="#handleChkMod" text="Modificar Parametros" />
                               <TableView fx:id="tblTabla" layoutX="20.0" layoutY="241.0" prefHeight="200.0" prefWidth="200.0" />
-                              <Separator layoutX="264.0" layoutY="10.0" orientation="VERTICAL" prefHeight="389.0" prefWidth="9.0" />
+                              <Separator layoutX="264.0" layoutY="10.0" orientation="VERTICAL" prefHeight="462.0" prefWidth="0.0" />
                            </children>
                         </AnchorPane>
                      </center>
@@ -82,7 +82,44 @@
           </Tab>
           <Tab text="Ejercicio B">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="14.0" layoutY="286.0" text="Cantidad de números" />
+                        <Label layoutX="14.0" layoutY="346.0" text="Cantidad de intervalos" />
+                        <TextField fx:id="txt_cant_numeros" layoutX="133.0" layoutY="282.0" prefHeight="25.0" prefWidth="137.0" />
+                        <TextField fx:id="txt_cant_intervalos" layoutX="136.0" layoutY="342.0" prefHeight="25.0" prefWidth="132.0" />
+                        <Label fx:id="lbl_alerta" layoutX="14.0" layoutY="314.0" prefHeight="17.0" prefWidth="344.0" textFill="RED" />
+                        <Button fx:id="btn_generar" layoutX="36.0" layoutY="428.0" mnemonicParsing="false" onAction="#handleButtonGenerar" text="Generar" />
+                        <Button fx:id="btn_reiniciar" layoutX="150.0" layoutY="428.0" mnemonicParsing="false" onAction="#handleButtonReiniciar" text="Reiniciar" />
+                        <Button fx:id="btn_graficar" layoutX="261.0" layoutY="428.0" mnemonicParsing="false" onAction="#handleButtonGraficar" text="Graficar" />
+                        <TableView fx:id="tbl_Tabla" layoutX="354.0" layoutY="62.0" prefHeight="266.0" prefWidth="295.0" />
+                        <StackPane layoutY="14.0">
+                           <children>
+                              <LineChart fx:id="lnchrEsperadaC_B" prefHeight="279.0" prefWidth="353.0">
+                                <xAxis>
+                                  <CategoryAxis side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis fx:id="yFrecLn_B" side="LEFT" />
+                                </yAxis>
+                              </LineChart>
+                              <BarChart fx:id="chrtFrecuenciaC_B" prefHeight="150.0" prefWidth="277.0">
+                                <xAxis>
+                                  <CategoryAxis side="BOTTOM" fx:id="xIntervalo_B" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis fx:id="yFrecBc_B" side="LEFT" />
+                                </yAxis>
+                              </BarChart>
+                           </children>
+                        </StackPane>
+                        <Label layoutX="366.0" layoutY="14.0" text="Sumatoria de Chi-Cuadrado: " />
+                        <Label layoutX="353.0" layoutY="38.0" text="¿Acepta prueba Chi Cuadrado?:" />
+                        <Label fx:id="lbl_sumatoria_chi_cuadrado" layoutX="530.0" layoutY="14.0" prefHeight="17.0" prefWidth="88.0" text=" " />
+                        <Label fx:id="lbl_acepta_prueba" layoutX="521.0" layoutY="38.0" prefHeight="17.0" prefWidth="100.0" />
+                        <TextArea fx:id="txt_serie" layoutX="350.0" layoutY="361.0" prefHeight="106.0" prefWidth="298.0" />
+                        <Label layoutX="446.0" layoutY="340.0" text="Serie generada" />
+                     </children></AnchorPane>
             </content>
           </Tab>
             <Tab text="Ejercicio C">
@@ -147,7 +184,7 @@
       </TabPane>
    </center>
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
+      <MenuBar prefHeight="25.0" prefWidth="677.0" BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
