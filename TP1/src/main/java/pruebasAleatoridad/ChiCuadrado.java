@@ -19,7 +19,7 @@ public class ChiCuadrado {
     private double tabla[][];   //Tabla...
     private double precision;   //Precision con la que quiero trabajar (0.1, 0.01, 0.001, 0.0001)
     private double[] tablaChiCuadrado95;        //valores de tabla chi2 nivel de confianza 0.95
-
+    private double r;
     public ChiCuadrado(double[] serie, int k, int op) {
         this.serie = serie;
         this.k = k;
@@ -51,7 +51,47 @@ public class ChiCuadrado {
                 precision = 0.0001;
                 break;
         }
-        this.tablaChiCuadrado95 = new double[]{3.84, 5.99, 7.81, 9.49, 11.1, 12.6, 14.1, 15.5, 16.9, 18.3, 19.7, 21.0, 22.4, 23.7, 25.0, 26.3, 27.6, 28.9, 30.1, 31.4, 32.7, 33.9, 35.2, 36.4, 37.7, 38.9, 40.1, 41.3, 42.6, 43.8, 55.8, 67.5, 79.1, 90.5, 101.9, 113.1, 124.3};
+        this.r = 0;
+        this.tablaChiCuadrado95 = new double[100];
+        
+        tablaChiCuadrado95[0] = 3.841;
+        tablaChiCuadrado95[1] = 5.991;
+        tablaChiCuadrado95[2] = 7.815;
+        tablaChiCuadrado95[3] = 9.488;
+        tablaChiCuadrado95[4] = 11.070;
+        tablaChiCuadrado95[5] = 12.592;
+        tablaChiCuadrado95[6] = 14.067;
+        tablaChiCuadrado95[7] = 15.507;
+        tablaChiCuadrado95[8] = 16.919;
+        tablaChiCuadrado95[9] = 18.307;
+        tablaChiCuadrado95[10] = 19.675;
+        tablaChiCuadrado95[11] = 21.026;
+        tablaChiCuadrado95[12] = 22.362;
+        tablaChiCuadrado95[13] = 23.685;
+        tablaChiCuadrado95[14] = 24.996;
+        tablaChiCuadrado95[15] = 26.296;
+        tablaChiCuadrado95[16] = 27.587;
+        tablaChiCuadrado95[17] = 28.869;
+        tablaChiCuadrado95[18] = 30.144;
+        tablaChiCuadrado95[19] = 31.410;
+        tablaChiCuadrado95[20] = 32.671;
+        tablaChiCuadrado95[21] = 33.924;
+        tablaChiCuadrado95[22] = 35.172;
+        tablaChiCuadrado95[23] = 36.415;
+        tablaChiCuadrado95[24] = 37.652;
+        tablaChiCuadrado95[25] = 38.885;
+        tablaChiCuadrado95[26] = 40.113;
+        tablaChiCuadrado95[27] = 41.337;
+        tablaChiCuadrado95[28] = 42.557;
+        tablaChiCuadrado95[29] = 43.773;
+        tablaChiCuadrado95[39] = 53.7;
+        tablaChiCuadrado95[49] = 66.8;
+        tablaChiCuadrado95[59] = 79.5;
+        tablaChiCuadrado95[69] = 104.2;
+        tablaChiCuadrado95[79] = 116.3;
+        tablaChiCuadrado95[89] = 128.3;
+        tablaChiCuadrado95[99] = 140.2;
+        
     }
     
     public void distribucion(){
@@ -75,7 +115,7 @@ public class ChiCuadrado {
         for (int i = 0; i < k; i++) {
             tabla[4][i] = tabla[3][i] / tabla[2][i];
         }
-        double r=0;
+        
         for (int i = 0; i < k; i++) {
             r += tabla[4][i];
         }
@@ -84,7 +124,7 @@ public class ChiCuadrado {
 
     public boolean hipotesis() {
         distribucion();
-        return chiCalculada() <= tablaChiCuadrado95[v + 1];
+        return chiCalculada() <= tablaChiCuadrado95[v - 1];
 
     }
 
@@ -120,6 +160,14 @@ public class ChiCuadrado {
         this.tabla = tabla;
     }
 
+    public String getPosTabla (int col,int row){
+        return String.valueOf(tabla[col][row]);
+    }
+    
+    public String getValueTablaChi (){
+        return String.valueOf(tablaChiCuadrado95[v - 1]);
+    }
+    
     public double getPrecision() {
         return precision;
     }
@@ -165,5 +213,9 @@ public class ChiCuadrado {
         return tabla[2][intervalo];
     }
     
+    
+    public double getR() {
+        return r;
+    }
 
 }

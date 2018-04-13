@@ -15,6 +15,7 @@ import javafx.scene.control.ToggleGroup;
 import generadoresPseudoAleatorios.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -79,17 +80,11 @@ public class FXMLController implements Initializable
     private Congruencial rndGenerator;
 
     ///Ejercicio B
-    @FXML
     private Button btn_generar;
-    @FXML
-    private Button btn_reiniciar;
-    @FXML
     private Button btn_graficar;
     @FXML
     private Label lbl_acepta_prueba;
-    @FXML
     private TextField txt_cant_intervalos;
-    @FXML
     private TextField txt_cant_numeros;
     @FXML
     private Label lbl_sumatoria_chi_cuadrado;
@@ -97,13 +92,8 @@ public class FXMLController implements Initializable
     private TableView tbl_Tabla = new TableView();
     @FXML
     private TextArea txt_serie;
-    @FXML
     private Label lbl_alerta;
-    @FXML
     private NumberAxis yFrecBc_B;
-    @FXML
-    private CategoryAxis xIntervalo_B;
-    @FXML
     private BarChart chrtFrecuenciaC_B;
     private final ObservableList<Row_B> data_B = FXCollections.observableArrayList();
     private ChiCuadradoB chi_B;
@@ -134,10 +124,12 @@ public class FXMLController implements Initializable
 
     private double[] serie;
     private ChiCuadrado pruebaChi;
-    @FXML
     private NumberAxis yFrecLn_B;
-    @FXML
     private LineChart<?, ?> lnchrEsperadaC_B;
+    @FXML
+    private CheckBox chkCMixto;
+    @FXML
+    private TextField txtSemillaC;
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
@@ -173,6 +165,8 @@ public class FXMLController implements Initializable
 
         colIndice.setCellValueFactory(new PropertyValueFactory("indice"));
         colRND.setCellValueFactory(new PropertyValueFactory("rnd"));
+        
+        tblTabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         //Tooltips de ayuda
         final Tooltip tooltip = new Tooltip();
@@ -193,18 +187,23 @@ public class FXMLController implements Initializable
 //////////////////////////////////////////////////////Ejercicio B/////////////////////////////////////////////
         tbl_Tabla.setEditable(true);
 
-        TableColumn colDesde = new TableColumn("Desde");
-        TableColumn colHasta = new TableColumn("Hasta");
+        TableColumn colIntervalo = new TableColumn("Intervalo");
         TableColumn colFrec_obt = new TableColumn("Frecuencia Obtenida");
         TableColumn colFrec_esp = new TableColumn("Frecuencia Esperada");
+        TableColumn col3 = new TableColumn("(fo-fe)^2");
+        TableColumn col4 = new TableColumn("(col 3)/fe");
 
-        colDesde.setCellValueFactory(new PropertyValueFactory<>("desde"));
-        colHasta.setCellValueFactory(new PropertyValueFactory<>("hasta"));
+        colIntervalo.setCellValueFactory(new PropertyValueFactory<>("intervalo"));
         colFrec_obt.setCellValueFactory(new PropertyValueFactory<>("frecuencia_obtenida"));
         colFrec_esp.setCellValueFactory(new PropertyValueFactory<>("frecuencia_esperada"));
+        col3.setCellValueFactory(new PropertyValueFactory<>("col3"));
+        col4.setCellValueFactory(new PropertyValueFactory<>("col4"));
+        
+        
 
-        tbl_Tabla.getColumns().addAll(colDesde, colHasta, colFrec_obt, colFrec_esp);
-        btn_graficar.setDisable(true);
+        tbl_Tabla.getColumns().addAll(colIntervalo, colFrec_obt, colFrec_esp, col3, col4);
+        
+        tbl_Tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 //////////////////////////////////////////////////////Ejercicio C/////////////////////////////////////////////
         //No se necesita inicializar nada.
     }
@@ -371,6 +370,8 @@ public class FXMLController implements Initializable
         }
     }
 
+    
+
     //Clase PUBLICA interna para la creacion de filas de la tabla, con valor de indice y nro RND generado
     public static class Row
     {
@@ -408,194 +409,183 @@ public class FXMLController implements Initializable
     }
 
 //////////////////////////////////////////////////////Ejercicio B/////////////////////////////////////////////
-    @FXML
-    public void handleButtonGenerar(ActionEvent event)
+    public void cargatTabTabla()
     {
 
-        int numeros = Integer.parseInt(txt_cant_numeros.getText());
-        int intervalos = Integer.parseInt(txt_cant_intervalos.getText());
-
-        if (intervalos <= 30 || intervalos == 40 || intervalos == 50 || intervalos == 60 || intervalos == 70 || intervalos == 80 || intervalos == 90 || intervalos == 100)
-        {
-            lbl_alerta.setText("");
-            ChiCuadradoB chi_B = new ChiCuadradoB(intervalos, numeros);
-
-            int[] tabla_frecuencias = chi_B.generarTablaFrecuencias2();
-
-            List<String> lista = chi_B.getNumerosGenerados();
-            txt_serie.setText(lista.toString());
-
-            txt_cant_intervalos.setDisable(true);
-            txt_cant_numeros.setDisable(true);
-            btn_generar.setDisable(true);
-
-            StringBuilder sumatoria = new StringBuilder();
-            sumatoria.append(chi_B.valorTestChiCuadrado(tabla_frecuencias));
-            lbl_sumatoria_chi_cuadrado.setText(sumatoria.toString());
-
-            if (chi_B.testChiCuadrado(tabla_frecuencias))
-            {
-                lbl_acepta_prueba.setText("Prueba aceptada");
-            } else
-            {
-                lbl_acepta_prueba.setText("La prueba no fue aceptada");
-            }
-
-            //Creación de los intervalos
-            List<String> l = chi_B.getNumerosGenerados();
-            Collections.sort(l);
-
-            //Obtener el menor
-            double intervalo_menor = Double.parseDouble(l.get(0));
-
-            //Obtener el mayor
-            double intervalo_mayor = Double.parseDouble(l.get(l.size() - 1));
-
-            //Armo el recorrido
-            double recorrido = intervalo_mayor - intervalo_menor;
-
-            //Armo lo que se le suma a cada intervalo
-            double suma_a_intervalo = recorrido / intervalos;
-
-            //Armo la primer pasada
-            String auxIntervaloMenor_primeraPasada = String.valueOf(intervalo_menor);
-
-            double siguiente_intervalo = (double) Math.round((intervalo_menor + suma_a_intervalo) * 100d) / 100d;
-            String auxHasta = String.valueOf(siguiente_intervalo);
+//        int numeros = Integer.parseInt(txt_cant_numeros.getText());
+//        int intervalos = Integer.parseInt(txt_cant_intervalos.getText());
+//
+//        
+//            lbl_alerta.setText("");
+//            ChiCuadradoB chi_B = new ChiCuadradoB(intervalos, numeros);
+//
+//            int[] tabla_frecuencias = chi_B.generarTablaFrecuencias2();
+//
+//            List<String> lista = chi_B.getNumerosGenerados();
+//            txt_serie.setText(lista.toString());
+//
+//            txt_cant_intervalos.setDisable(true);
+//            txt_cant_numeros.setDisable(true);
+//            btn_generar.setDisable(true);
+//
+//            StringBuilder sumatoria = new StringBuilder();
+//            sumatoria.append(chi_B.valorTestChiCuadrado(tabla_frecuencias));
+//            lbl_sumatoria_chi_cuadrado.setText(sumatoria.toString());
+//
+//            if (chi_B.testChiCuadrado(tabla_frecuencias))
+//            {
+//                lbl_acepta_prueba.setText("Prueba aceptada");
+//            } else
+//            {
+//                lbl_acepta_prueba.setText("La prueba no fue aceptada");
+//            }
+//
+//            Creación de los intervalos
+//            List<String> l = chi_B.getNumerosGenerados();
+//            Collections.sort(l);
+//
+//            Obtener el menor
+//            double intervalo_menor = Double.parseDouble(l.get(0));
+//
+//            Obtener el mayor
+//            double intervalo_mayor = Double.parseDouble(l.get(l.size() - 1));
+//
+//            Armo el recorrido
+//            double recorrido = intervalo_mayor - intervalo_menor;
+//
+//            Armo lo que se le suma a cada intervalo
+//            double suma_a_intervalo = recorrido / intervalos;
+//
+//            Armo la primer pasada
+//            String auxIntervaloMenor_primeraPasada = String.valueOf(intervalo_menor);
+//
+//            double siguiente_intervalo = (double) Math.round((intervalo_menor + suma_a_intervalo) * 100d) / 100d;
+//            String auxHasta = String.valueOf(siguiente_intervalo);
 
             //Relleno de la tabla
-            for (int i = 0; i < intervalos; i++)
+            for (int i = 0; i < pruebaChi.getK() ; i++)
             {
-                String Frecuencia_obtenida = String.valueOf(tabla_frecuencias[i]);
-                String Frecuencia_esperada = String.valueOf(chi_B.frecuenciaEsperada());
+                String Frecuencia_observada = String.valueOf(pruebaChi.getFrecuenciaObs(i));
+                String Frecuencia_esperada = String.valueOf(pruebaChi.getFrecuenciaEsp(i));
+                String valueCol3 = pruebaChi.getPosTabla(3, i);
+                String valueCol4 = pruebaChi.getPosTabla(4, i);
+                data_B.add(new Row_B(pruebaChi.getIntervalo(i), Frecuencia_observada, Frecuencia_esperada, valueCol3, valueCol4));
 
-                data_B.add(new Row_B(auxIntervaloMenor_primeraPasada, auxHasta, Frecuencia_obtenida, Frecuencia_esperada));
-
-                //Calculo del "Desde"
-                double siguienteDesde = (double) Math.round((intervalo_menor + suma_a_intervalo) * 100d) / 100d;
-                String siguiente_menor = String.valueOf(siguienteDesde);
-
-                //Se va a sumar el valor anterior para poder tener los valores siguientes de "Hasta"
-                double siguienteHasta = (double) Math.round((siguienteDesde + suma_a_intervalo) * 100d) / 100d;
-                String fila_siguiente_hasta = String.valueOf(siguienteHasta);
-
-                //Sirve para poder seguir sumando el valor anterior y no se quede el principal
-                intervalo_menor = Double.parseDouble(siguiente_menor);
-
-                //Los valores en String para agregar en la proxima pasada, del valor "Desde" siguiente y el valor "Hasta" que le sigue
-                auxIntervaloMenor_primeraPasada = siguiente_menor;
-                auxHasta = fila_siguiente_hasta;
-
+//                //Calculo del "Desde"
+//                double siguienteDesde = (double) Math.round((intervalo_menor + suma_a_intervalo) * 100d) / 100d;
+//                String siguiente_menor = String.valueOf(siguienteDesde);
+//
+//                //Se va a sumar el valor anterior para poder tener los valores siguientes de "Hasta"
+//                double siguienteHasta = (double) Math.round((siguienteDesde + suma_a_intervalo) * 100d) / 100d;
+//                String fila_siguiente_hasta = String.valueOf(siguienteHasta);
+//
+//                //Sirve para poder seguir sumando el valor anterior y no se quede el principal
+//                intervalo_menor = Double.parseDouble(siguiente_menor);
+//
+//                //Los valores en String para agregar en la proxima pasada, del valor "Desde" siguiente y el valor "Hasta" que le sigue
+//                auxIntervaloMenor_primeraPasada = siguiente_menor;
+//                auxHasta = fila_siguiente_hasta;
             }
-            tbl_Tabla.setItems(data_B);
-            btn_graficar.setDisable(false);
-        } else
-        {
-            lbl_alerta.setText("Error, intervalos posibles: menor o igual a 30,40,50,60,70,80,90,100");
-        }
+            tbl_Tabla.getItems().addAll(data_B);
+            
+            
 
-        //Parametros para definir escala de eje Y
-        double unit_B = chi_B.frecuenciaEsperada() / (double) 10;
-        if (unit_B < 1)
-        {
-            unit_B = 1;
-        }
-        double upperLimit_B = chi_B.frecuenciaEsperada() + unit_B + 5;
+        
+        
 
-        // base bar chart
-        chrtFrecuenciaC_B.setLegendVisible(false);
-        chrtFrecuenciaC_B.setAnimated(false);
-        chrtFrecuenciaC_B.setCategoryGap(10);
-
-        // overlay line chart
-        lnchrEsperadaC_B.setLegendVisible(false);
-        lnchrEsperadaC_B.setAnimated(false);
-        lnchrEsperadaC_B.setCreateSymbols(true);
-        lnchrEsperadaC_B.setAlternativeRowFillVisible(false);
-        lnchrEsperadaC_B.setAlternativeColumnFillVisible(false);
-        lnchrEsperadaC_B.setHorizontalGridLinesVisible(false);
-        lnchrEsperadaC_B.setVerticalGridLinesVisible(false);
-        lnchrEsperadaC_B.getXAxis().setVisible(false);
-        lnchrEsperadaC_B.getYAxis().setVisible(false);
-        //Carga stylesheet a linechart
-        lnchrEsperadaC_B.getStylesheets().addAll(getClass().getResource("/styles/chart.css").toExternalForm());
-
-        //Sincronizar rango de eje Y de ambas graficas 
-        yFrecBc_B.setAutoRanging(false);
-        yFrecBc_B.setLowerBound(0);
-        yFrecBc_B.setUpperBound(upperLimit_B);
-        yFrecBc_B.setTickUnit(unit_B);
-
-        yFrecLn_B.setAutoRanging(false);
-        yFrecLn_B.setLowerBound(0);
-        yFrecLn_B.setUpperBound(upperLimit_B);
-        yFrecLn_B.setTickUnit(unit_B);
-
-        //Cargar datos de distribucion de frecuencia en graficos
-        XYChart.Series set3_B = new XYChart.Series<>();
-        for (int i = 0; i < chi_B.getK(); i++)
-        {
-            double aux_B = (double) i;
-            set3_B.getData().add(new XYChart.Data(chi_B.getIntervalo(aux_B), chi_B.frecuenciaEsperada()));
-        }
-        chrtFrecuenciaC_B.getData().addAll(set3_B);
-
-        XYChart.Series set2_B = new XYChart.Series<>();
-        for (int i = 0; i < chi_B.getK(); i++)
-        {
-            double aux_B = (double) i;
-            set2_B.getData().add(new XYChart.Data(chi_B.getIntervalo(aux_B), chi_B.frecuenciaEsperada()));
-        }
-        lnchrEsperadaC_B.getData().addAll(set2_B);
-
-    }
-
-    @FXML
-    private void handleButtonGraficar(ActionEvent event)
-    {
+//        //Parametros para definir escala de eje Y
+//        double unit_B = chi_B.frecuenciaEsperada() / (double) 10;
+//        if (unit_B < 1)
+//        {
+//            unit_B = 1;
+//        }
+//        double upperLimit_B = chi_B.frecuenciaEsperada() + unit_B + 5;
+//
+//        // base bar chart
+//        chrtFrecuenciaC_B.setLegendVisible(false);
+//        chrtFrecuenciaC_B.setAnimated(false);
+//        chrtFrecuenciaC_B.setCategoryGap(10);
+//
+//        // overlay line chart
+//        lnchrEsperadaC_B.setLegendVisible(false);
+//        lnchrEsperadaC_B.setAnimated(false);
+//        lnchrEsperadaC_B.setCreateSymbols(true);
+//        lnchrEsperadaC_B.setAlternativeRowFillVisible(false);
+//        lnchrEsperadaC_B.setAlternativeColumnFillVisible(false);
+//        lnchrEsperadaC_B.setHorizontalGridLinesVisible(false);
+//        lnchrEsperadaC_B.setVerticalGridLinesVisible(false);
+//        lnchrEsperadaC_B.getXAxis().setVisible(false);
+//        lnchrEsperadaC_B.getYAxis().setVisible(false);
+//        //Carga stylesheet a linechart
+//        lnchrEsperadaC_B.getStylesheets().addAll(getClass().getResource("/styles/chart.css").toExternalForm());
+//
+//        //Sincronizar rango de eje Y de ambas graficas 
+//        yFrecBc_B.setAutoRanging(false);
+//        yFrecBc_B.setLowerBound(0);
+//        yFrecBc_B.setUpperBound(upperLimit_B);
+//        yFrecBc_B.setTickUnit(unit_B);
+//
+//        yFrecLn_B.setAutoRanging(false);
+//        yFrecLn_B.setLowerBound(0);
+//        yFrecLn_B.setUpperBound(upperLimit_B);
+//        yFrecLn_B.setTickUnit(unit_B);
+//
+//        //Cargar datos de distribucion de frecuencia en graficos
+//        XYChart.Series set3_B = new XYChart.Series<>();
+//        for (int i = 0; i < chi_B.getK(); i++)
+//        {
+//            double aux_B = (double) i;
+//            set3_B.getData().add(new XYChart.Data(chi_B.getIntervalo(aux_B), chi_B.frecuenciaEsperada()));
+//        }
+//        chrtFrecuenciaC_B.getData().addAll(set3_B);
+//
+//        XYChart.Series set2_B = new XYChart.Series<>();
+//        for (int i = 0; i < chi_B.getK(); i++)
+//        {
+//            double aux_B = (double) i;
+//            set2_B.getData().add(new XYChart.Data(chi_B.getIntervalo(aux_B), chi_B.frecuenciaEsperada()));
+//        }
+//        lnchrEsperadaC_B.getData().addAll(set2_B);
 
     }
 
-    @FXML
-    private void handleButtonReiniciar(ActionEvent event)
-    {
-        txt_cant_intervalos.setDisable(false);
-        txt_cant_numeros.setDisable(false);
-        txt_cant_intervalos.setText("");
-        txt_cant_numeros.setText("");
-        lbl_acepta_prueba.setText("");
-        lbl_sumatoria_chi_cuadrado.setText("");
-        btn_generar.setDisable(false);
-        tbl_Tabla.getItems().clear();
-        txt_serie.clear();
-        btn_graficar.setDisable(true);
-        lbl_alerta.setText("");
-    }
+
+//    private void handleButtonReiniciar(ActionEvent event)
+//    {
+//        txt_cant_intervalos.setDisable(false);
+//        txt_cant_numeros.setDisable(false);
+//        txt_cant_intervalos.setText("");
+//        txt_cant_numeros.setText("");
+//        lbl_acepta_prueba.setText("");
+//        lbl_sumatoria_chi_cuadrado.setText("");
+//        btn_generar.setDisable(false);
+//        tbl_Tabla.getItems().clear();
+//        txt_serie.clear();
+//        btn_graficar.setDisable(true);
+//        lbl_alerta.setText("");
+//    }
 
     public static class Row_B
     {
 
-        private final SimpleStringProperty desde;
-        private final SimpleStringProperty hasta;
+        private final SimpleStringProperty intervalo; 
         private final SimpleStringProperty frecuencia_obtenida;
         private final SimpleStringProperty frecuencia_esperada;
+        private final SimpleStringProperty col3;
+        private final SimpleStringProperty col4;
 
-        private Row_B(String desde, String hasta, String frecuencia_obtenida, String frecuencia_esperada)
+        private Row_B(String intervalo, String frecuencia_obtenida, String frecuencia_esperada, String col3, String col4)
         {
-            this.desde = new SimpleStringProperty(desde);
-            this.hasta = new SimpleStringProperty(hasta);
+            this.intervalo = new SimpleStringProperty(intervalo);
             this.frecuencia_esperada = new SimpleStringProperty(frecuencia_esperada);
             this.frecuencia_obtenida = new SimpleStringProperty(frecuencia_obtenida);
+            this.col3 =new SimpleStringProperty(col3);
+            this.col4 =new SimpleStringProperty(col4);
         }
 
         public void setDesde(String asd)
         {
-            desde.set(asd);
-        }
-
-        public void setHasta(String asd)
-        {
-            hasta.set(asd);
+            intervalo.set(asd);
         }
 
         public void setFrec_esp(String asd)
@@ -608,14 +598,19 @@ public class FXMLController implements Initializable
             frecuencia_obtenida.set(asd);
         }
 
-        public String getDesde()
+        public void setCol3(String asd)
         {
-            return desde.get();
+            col3.set(asd);
+        }
+        
+        public void setCol4(String asd)
+        {
+            col4.set(asd);
         }
 
-        public String getHasta()
+        public String getIntervalo()
         {
-            return hasta.get();
+            return intervalo.get();
         }
 
         public String getFrecuencia_obtenida()
@@ -626,6 +621,15 @@ public class FXMLController implements Initializable
         public String getFrecuencia_esperada()
         {
             return frecuencia_esperada.get();
+        }
+        
+        public String getCol3()
+        {
+            return col3.get();
+        }
+        public String getCol4()
+        {
+            return col4.get();
         }
 
     }
@@ -640,28 +644,50 @@ public class FXMLController implements Initializable
         btnReiniciarC.setDisable(false);
         txtCantIntervalosC.setDisable(true);
         txtCantNrosC.setDisable(true);
-        Reiniciar(event);
+//        Reiniciar(event);
 
         //Genera serie aleatoria con generadorRND congruencial mixto para probar
-        rndGenerator = new Congruencial();
+        
         serie = new double[Integer.parseInt(txtCantNrosC.getText())];
-
-        for (int i = 0; i < serie.length; i++)
-        {
-            serie[i] = Double.parseDouble(rndGenerator.truncateRND());
-            lsvSerie.getItems().add(serie[i]);
+        
+        if (chkCMixto.isSelected()) {
+            rndGenerator = new Congruencial(71561, 341157, 56822, Double.parseDouble(txtSemillaC.getText()), false, false, 4);
+            for (int i = 0; i < serie.length; i++) {
+                serie[i] = Double.parseDouble(rndGenerator.truncateRND());
+                lsvSerie.getItems().add(serie[i]);
+            }
+        } else {
+            for (int i = 0; i < serie.length; i++) {
+                Random rnd = new Random();
+                double numeroAleatorio = rnd.nextDouble();
+                double redondeado =  Math.round(numeroAleatorio * 10000d) / 10000d;
+                serie[i] = redondeado;
+                        
+                lsvSerie.getItems().add(serie[i]);
+            }
+            
         }
-
+        
+        int intervalos = Integer.parseInt(txtCantIntervalosC.getText());
+        for (int i = 3; i < 7; i++) {
+            if (intervalos > (10*i + 1)) {
+                intervalos = 10*i + 1;
+            }
+        }
+        
+        
         //Calculo de chicuadrado y verificacion de hipotesis
-        pruebaChi = new ChiCuadrado(serie, Integer.parseInt(txtCantIntervalosC.getText()), rndGenerator.getPrecision());
+        pruebaChi = new ChiCuadrado(serie, intervalos , 4);
         if (pruebaChi.hipotesis())
         {
             txtAResultados.setText("Se aprueba hipotesis \nFrecuencia esperada: " + pruebaChi.getFrecuenciaEsp(1));
             txtAResultados.setVisible(true);
+            lbl_acepta_prueba.setText("Se acepta hipotesis. " + pruebaChi.getR() + " < " + pruebaChi.getValueTablaChi());
         } else
         {
             txtAResultados.setText("Se rechaza hipotesis \nFrecuencia esperada: " + pruebaChi.getFrecuenciaEsp(1));
             txtAResultados.setVisible(true);
+            lbl_acepta_prueba.setText("Se rechaza hipotesis. " + pruebaChi.getR() + " > " + pruebaChi.getValueTablaChi());
         }
 
         //Parametros para definir escala de eje Y
@@ -717,6 +743,10 @@ public class FXMLController implements Initializable
             set2.getData().add(new XYChart.Data(pruebaChi.getIntervalo(aux), pruebaChi.getFrecuenciaEsp(i)));
         }
         lnchrEsperadaC.getData().addAll(set2);
+        
+        //Cargar datos en tab Tabla
+        cargatTabTabla();
+        lbl_sumatoria_chi_cuadrado.setText(String.valueOf(pruebaChi.getR()));
 
     }
 
@@ -729,8 +759,24 @@ public class FXMLController implements Initializable
         txtCantIntervalosC.setDisable(false);
         txtCantNrosC.setDisable(false);
         txtAResultados.setVisible(false);
+        txtAResultados.setText("");
+        txtCantNrosC.setText("");
+        txtSemillaC.setText("");
+        txtCantIntervalosC.setText("");
+            
 
         chrtFrecuenciaC.getData().clear();
         lnchrEsperadaC.getData().clear();
+        
+        lsvSerie.getItems().clear();
+    }
+    
+    @FXML
+    private void handleChkCMixto(ActionEvent event) {
+        if (chkCMixto.isSelected()) {
+            txtSemillaC.setDisable(false);
+        } else {
+            txtSemillaC.setDisable(true);
+        }
     }
 }
